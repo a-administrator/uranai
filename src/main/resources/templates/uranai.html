@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+	<!--↓スマホ表示用-->
+	<meta name="viewport" content="width=device-width">
+    <title>Fortune</title>
+    <style>
+		body {
+		    margin: 0;
+		    padding: 0;
+		    min-height: 100vh;
+		    background-image: url('/img/sityo-se-.jpg');
+		    background-size: cover;
+		    background-repeat: no-repeat;
+		    background-position: center;
+		    color: white;
+		    font-family: "Hiragino Mincho ProN", "游明朝", "MS 明朝", serif;
+		    text-align: center;
+		    overflow-x: hidden;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: flex-start;
+		    align-items: center;
+		}
+
+        label, select, input, button, h1 {
+            font-family: "Hiragino Mincho ProN", "游明朝", "MS 明朝", serif;
+            color: white;
+            font-size: 20px;
+        }
+
+        select, input {
+            padding: 6px;
+            margin: 6px;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid white;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: rgba(255,255,255,0.4);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fortune Form</h1>
+
+    <form id="uranaiForm">
+        <label>生年月日：</label>
+        <select id="year"></select> 年
+        <select id="month"></select> 月
+        <select id="day"></select> 日
+
+        <label>お名前：</label>
+        <input type="text" id="name">
+
+        <button type="button" id="uranauBtn">占う</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        // 年のプルダウン生成（1900〜2100）
+        const yearSelect = document.getElementById("year");
+        for (let y = 1900; y <= 2100; y++) {
+            const option = document.createElement("option");
+            option.value = y;
+            option.textContent = y;
+            yearSelect.appendChild(option);
+        }
+
+        // 月のプルダウン生成（1〜12）
+        const monthSelect = document.getElementById("month");
+        for (let m = 1; m <= 12; m++) {
+            const option = document.createElement("option");
+            option.value = m;
+            option.textContent = m;
+            monthSelect.appendChild(option);
+        }
+
+        // 日のプルダウン生成（初期は1〜31）
+        const daySelect = document.getElementById("day");
+        function setDays(year, month) {
+            daySelect.innerHTML = "";
+            const daysInMonth = new Date(year, month, 0).getDate();
+		//new Date～カレンダー、javascriptのDateオブジェクトがうるう年判定
+            for (let d = 1; d <= daysInMonth; d++) {
+                const option = document.createElement("option");
+                option.value = d;
+                option.textContent = d;
+                daySelect.appendChild(option);
+            }
+        }
+
+        // 初期表示
+        setDays(2025, 1);
+
+        // 年・月変更時
+        yearSelect.addEventListener("change", () => {
+            setDays(yearSelect.value, monthSelect.value);
+        });
+        monthSelect.addEventListener("change", () => {
+            setDays(yearSelect.value, monthSelect.value);
+        });
+
+        // 占うボタンイベント
+        document.getElementById("uranauBtn").addEventListener("click", () => {
+            const name = document.getElementById("name").value;
+            const year = document.getElementById("year").value;
+            const month = document.getElementById("month").value;
+            const day = document.getElementById("day").value;
+
+            const data = {
+                name: name,
+                birthYear: year,
+                birthMonth: month,
+                birthDay: day
+            };
+
+            fetch('/uranai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(result => {
+                document.getElementById("result").innerHTML = result;
+            })
+            .catch(error => {
+                console.error("エラー:", error);
+            });
+        });
+    </script>
+</body>
+</html>
