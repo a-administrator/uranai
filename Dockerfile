@@ -1,5 +1,7 @@
+# 修正後の Dockerfile
+
 # ステージ 1: ビルド環境 (GradleとJDKを含むイメージを使用)
-FROM gradle:jdk17 AS builder
+FROM eclipse-temurin:17-jdk-focal AS builder 
 
 # 作業ディレクトリを設定
 WORKDIR /app
@@ -8,12 +10,16 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY src/ ./src/
 
+# Gradle Wrapperのファイルもコピー
+COPY gradlew ./
+# Gradle実行ファイルの実行権限を付与
+RUN chmod +x ./gradlew
+
 # Gradleでアプリケーションをビルド (テストをスキップ)
-# build/libs/your-app-name.jar が生成される
-RUN gradle build --no-daemon -x test
+RUN ./gradlew clean build --no-daemon -x test
 
 # ステージ 2: 実行環境 (軽量なJavaランタイムのみを含むイメージを使用)
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # ビルドステージからJARファイルをコピー
 COPY --from=builder /app/build/libs/*.jar app.jar
