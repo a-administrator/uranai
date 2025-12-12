@@ -1,14 +1,13 @@
-# 修正後の Dockerfile (v4 - Java 21 対応)
+# 修正後の Dockerfile (v5 - Java 21 & タグ修正)
 
 # ステージ 1: ビルド環境 (Temurin JDK 21を使用)
-# GradleはJDK 21が必要です
-FROM eclipse-temurin:21-jdk-focal AS builder 
+# タグを「21-jdk」に変更し、より汎用的な指定に
+FROM eclipse-temurin:21-jdk AS builder 
 
 # 作業ディレクトリを設定
 WORKDIR /app
 
 # (1) Gradle Wrapper関連のファイルをコピー
-# gradlew (実行ファイル)と gradle/wrapper ディレクトリをコピー
 COPY gradlew .
 COPY gradle/wrapper/ gradle/wrapper/ 
 
@@ -20,16 +19,13 @@ COPY src/ ./src/
 RUN chmod +x gradlew
 
 # (4) Gradleでアプリケーションをビルド (テストをスキップ)
-# build/libs/*.jar が生成される
 RUN ./gradlew clean build --no-daemon -x test
 
 # ステージ 2: 実行環境 (軽量なJava JRE 21を使用)
-# 実行環境もJDK 21に対応
+# タグを「21-jre-alpine」に変更（軽量な実行環境）
 FROM eclipse-temurin:21-jre-alpine
 
 # ビルドステージからJARファイルをコピー
-# アプリケーションのJARファイル名を環境変数で定義（汎用性のため）
-# build/libs/your-app-name.jar が生成されると仮定
 ARG JAR_FILE=build/libs/*.jar
 COPY --from=builder /app/${JAR_FILE} app.jar
 
