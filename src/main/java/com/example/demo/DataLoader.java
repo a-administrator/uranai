@@ -44,5 +44,6 @@ public class DataLoader implements CommandLineRunner {
         nounRepo.save(new WordNoun(null, "歯の治療"));
         nounRepo.save(new WordNoun(null, "心斎橋駅"));
         nounRepo.save(new WordNoun(null, "笹"));
+        nounRepo.save(new WordNoun(null, "アルパカのひづめ"));
     }
 }
